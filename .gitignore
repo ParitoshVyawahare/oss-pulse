@@ -1,0 +1,21 @@
+# secrets
+.env
+
+# python
+__pycache__/
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# data (never commit data files)
+data/
+*.json.gz
+*.parquet
+
+# dbt
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+
+# os
+.DS_Store
