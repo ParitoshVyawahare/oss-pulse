@@ -1,1 +1,1 @@
-"""OSS Pulse ingestion: GH Archive hourly files -> filtered Parquet in the landing zone."""
+"""OSS Pulse ingestion: GitHub REST API -> raw-JSON Parquet in the landing zone."""

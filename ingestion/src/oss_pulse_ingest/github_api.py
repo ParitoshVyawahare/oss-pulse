@@ -50,6 +50,7 @@ class GitHubClient:
         )
         self.max_retries = max_retries
         self.sleep = sleep  # injectable so tests don't actually wait
+        self.request_count = 0  # lets us report how much of the rate limit a run used
 
     def get(self, url: str, params: dict | None = None) -> requests.Response:
         """GET with retries. Redirects (renamed repos) are followed automatically."""
@@ -57,7 +58,15 @@ class GitHubClient:
             url = f"{API_URL}/{url.lstrip('/')}"
 
         for attempt in range(1, self.max_retries + 1):
-            resp = self.session.get(url, params=params, timeout=30)
+            try:
+                resp = self.session.get(url, params=params, timeout=30)
+            except (requests.Timeout, requests.ConnectionError) as exc:
+                # No answer at all (timeout, dropped connection): also worth retrying.
+                wait = 2**attempt
+                log.warning("Network error (%s); retrying in %ds", type(exc).__name__, wait)
+                self.sleep(wait)
+                continue
+            self.request_count += 1
 
             if resp.status_code in (403, 429) and self._is_rate_limited(resp):
                 wait = self._seconds_until_allowed(resp)

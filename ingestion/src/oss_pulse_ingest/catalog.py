@@ -19,3 +19,15 @@ def load_catalog(path: Path) -> frozenset[str]:
     if not repos:
         raise ValueError(f"{path} contains no repositories")
     return frozenset(repos)
+
+
+def load_catalog_rows(path: Path) -> list[dict]:
+    """Full catalog rows (repo_id, repo_name, category), for the API extractor."""
+    with path.open(newline="", encoding="utf-8") as f:
+        rows = [r for r in csv.DictReader(f) if r.get("repo_name", "").strip()]
+    missing_ids = [r["repo_name"] for r in rows if not r.get("repo_id")]
+    if missing_ids:
+        raise ValueError(
+            f"Run oss-pulse-check-catalog --write first; missing repo_id: {missing_ids}"
+        )
+    return rows

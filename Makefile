@@ -1,4 +1,4 @@
-.PHONY: install test lint ingest-hour ingest-week
+.PHONY: install test lint check-catalog extract-month
 
 install:  ## install dependencies and git hooks
 	uv sync
@@ -11,8 +11,8 @@ lint:  ## lint and format-check python
 	uv run ruff check .
 	uv run ruff format --check .
 
-ingest-hour:  ## ingest a single hour (smoke test)
-	uv run oss-pulse-ingest --start 2026-09-21T15
+check-catalog:  ## validate repo names and IDs against the GitHub API
+	uv run --env-file .env oss-pulse-check-catalog
 
-ingest-week:  ## ingest 7 days; safe to stop and rerun
-	uv run oss-pulse-ingest --start 2026-09-21T00 --end 2026-09-27T23 --skip-existing
+extract-month:  ## extract one month for all repos, e.g. make extract-month START=2026-09-01 END=2026-10-01
+	uv run --env-file .env oss-pulse-extract --start $(START) --end $(END)

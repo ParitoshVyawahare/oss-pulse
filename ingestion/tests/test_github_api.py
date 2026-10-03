@@ -85,3 +85,23 @@ def test_check_catalog_flags_renames_and_missing_repos():
     assert updated[0]["repo_id"] == "53548867"
     assert any("RENAMED" in p for p in problems)
     assert any("NOT FOUND" in p for p in problems)
+
+
+class TimeoutThenOkSession(FakeSession):
+    """First call times out (no response at all), second call succeeds."""
+
+    def get(self, url, params=None, timeout=None):
+        import requests
+
+        if not self.urls:
+            self.urls.append(url)
+            raise requests.Timeout("read timed out")
+        return super().get(url, params, timeout)
+
+
+def test_retries_network_timeouts():
+    session = TimeoutThenOkSession([FakeResponse(body={"ok": True})])
+    waits = []
+    client = GitHubClient("t", session=session, sleep=waits.append)
+    assert client.get("x").json() == {"ok": True}
+    assert waits == [2]

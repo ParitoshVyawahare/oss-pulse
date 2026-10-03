@@ -6,12 +6,11 @@ requires-python = ">=3.12"
 dependencies = [
     "requests>=2.32",
     "pyarrow>=17",
-    "orjson>=3.10",
 ]
 
 [project.scripts]
-oss-pulse-ingest = "oss_pulse_ingest.cli:main"
 oss-pulse-check-catalog = "oss_pulse_ingest.check_catalog:main"
+oss-pulse-extract = "oss_pulse_ingest.extract_cli:main"
 
 [dependency-groups]
 dev = [
