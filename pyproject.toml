@@ -11,6 +11,7 @@ dependencies = [
 
 [project.scripts]
 oss-pulse-ingest = "oss_pulse_ingest.cli:main"
+oss-pulse-check-catalog = "oss_pulse_ingest.check_catalog:main"
 
 [dependency-groups]
 dev = [
