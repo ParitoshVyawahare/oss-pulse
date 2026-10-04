@@ -103,3 +103,16 @@ def test_extract_writes_raw_json_idempotently(tmp_path):
     assert table.column("record_id").to_pylist() == ["7"]
     assert '"title":"x"' in table.column("record").to_pylist()[0]
     assert sorted(p.name for p in path.parent.iterdir()) == ["repo_id=42.parquet"]
+
+
+def test_window_from_scheduled_interval_is_used_as_is():
+    start = datetime(2026, 10, 3, tzinfo=UTC)
+    end = datetime(2026, 10, 4, tzinfo=UTC)
+    assert Window.from_interval(start, end) == Window(start, end)
+
+
+def test_window_from_manual_run_becomes_previous_full_day():
+    moment = datetime(2026, 10, 4, 16, 45, 53, tzinfo=UTC)  # manual run: start == end
+    window = Window.from_interval(moment, moment)
+    assert window.start == datetime(2026, 10, 3, tzinfo=UTC)
+    assert window.end == datetime(2026, 10, 4, tzinfo=UTC)

@@ -17,7 +17,7 @@ import json
 import os
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pyarrow as pa
@@ -54,6 +54,21 @@ class Window:
     @property
     def label(self) -> str:
         return f"{self.start:%Y-%m-%d}_{self.end:%Y-%m-%d}"
+
+    @classmethod
+    def from_interval(cls, start: datetime | None, end: datetime | None) -> Window:
+        """Build a window from Airflow's data interval.
+
+        Scheduled and backfill runs have a real interval (e.g. one full UTC day).
+        A manual run has start == end (a single moment), so we treat it as
+        "the previous full UTC day". That way a manual trigger always does useful,
+        predictable work, and rerunning it overwrites the same files (idempotent).
+        """
+        if start is None or end is None or end <= start:
+            anchor = (end or start or datetime.now(UTC)).astimezone(UTC)
+            day_end = anchor.replace(hour=0, minute=0, second=0, microsecond=0)
+            return cls(day_end - timedelta(days=1), day_end)
+        return cls(start.astimezone(UTC), end.astimezone(UTC))
 
 
 def ts(value: str) -> datetime:
