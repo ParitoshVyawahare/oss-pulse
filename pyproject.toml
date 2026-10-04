@@ -32,6 +32,8 @@ testpaths = ["ingestion/tests"]
 [tool.ruff]
 line-length = 100
 target-version = "py312"
+extend-exclude = ["airflow/.astro"]  # generated and managed by the Astro CLI
+force-exclude = true  # apply excludes even when pre-commit passes files directly
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]

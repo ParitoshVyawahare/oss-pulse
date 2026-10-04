@@ -1,0 +1,8 @@
+# Local development only: let Airflow see the rest of the OSS Pulse repo.
+services:
+  scheduler:
+    volumes:
+      - ../:/usr/local/airflow/oss-pulse
+  dag-processor:
+    volumes:
+      - ../:/usr/local/airflow/oss-pulse
