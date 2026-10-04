@@ -10,6 +10,8 @@ from datetime import timedelta
 
 from airflow.sdk import Asset, task
 
+from oss_pulse_dags.alerts import notify_slack_on_failure
+
 # Downstream DAGs (dbt, week 3+) will be scheduled on this Asset instead of a clock time.
 GITHUB_LANDING = Asset("oss_pulse_github_landing")
 
@@ -18,6 +20,7 @@ DEFAULT_ARGS = {
     "retries": 3,
     "retry_delay": timedelta(minutes=2),
     "retry_exponential_backoff": True,
+    "on_failure_callback": notify_slack_on_failure,  # Slack message after the final retry
 }
 
 RESULT_KEYS = ("repos", "pulls", "issues", "comments", "releases", "requests")
