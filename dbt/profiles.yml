@@ -1,0 +1,14 @@
+# Connection settings. No secrets here: values come from environment variables (.env).
+oss_pulse:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('SNOWFLAKE_USER') }}"
+      private_key_path: "{{ env_var('SNOWFLAKE_PRIVATE_KEY_PATH') }}"
+      role: TRANSFORMER
+      warehouse: TRANSFORM_WH
+      database: OSS_PULSE_DEV
+      schema: dev
+      threads: 4
