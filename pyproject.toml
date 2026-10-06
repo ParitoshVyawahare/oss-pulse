@@ -6,11 +6,13 @@ requires-python = ">=3.12"
 dependencies = [
     "requests>=2.32",
     "pyarrow>=17",
+    "snowflake-connector-python>=4.8.0",
 ]
 
 [project.scripts]
 oss-pulse-check-catalog = "oss_pulse_ingest.check_catalog:main"
 oss-pulse-extract = "oss_pulse_ingest.extract_cli:main"
+oss-pulse-load = "oss_pulse_ingest.load_cli:main"
 
 [dependency-groups]
 dev = [
