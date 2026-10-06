@@ -1,0 +1,77 @@
+version: 2
+
+models:
+  - name: stg_github__pulls
+    description: One row per pull request (latest extracted version). Bots flagged.
+    columns:
+      - name: pull_request_id
+        description: GitHub's global id for the PR. Primary key.
+        data_tests: [unique, not_null]
+      - name: repo_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('repo_catalog')
+                field: repo_id
+      - name: state
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['open', 'closed']
+      - name: created_at
+        data_tests: [not_null]
+      - name: is_bot_author
+        description: True for GitHub Bot accounts and logins ending in [bot].
+
+  - name: stg_github__issues
+    description: One row per issue (latest extracted version). PRs excluded.
+    columns:
+      - name: issue_id
+        data_tests: [unique, not_null]
+      - name: repo_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('repo_catalog')
+                field: repo_id
+      - name: state
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['open', 'closed']
+      - name: created_at
+        data_tests: [not_null]
+
+  - name: stg_github__comments
+    description: One row per comment on an issue or PR (latest extracted version).
+    columns:
+      - name: comment_id
+        data_tests: [unique, not_null]
+      - name: issue_number
+        data_tests: [not_null]
+      - name: created_at
+        data_tests: [not_null]
+
+  - name: stg_github__releases
+    description: One row per release (latest extracted version).
+    columns:
+      - name: release_id
+        data_tests: [unique, not_null]
+      - name: created_at
+        data_tests: [not_null]
+
+  - name: stg_github__repo_snapshots
+    description: One row per repo per capture day. History is kept for SCD Type 2.
+    columns:
+      - name: repo_snapshot_key
+        description: repo_id + capture date. Primary key.
+        data_tests: [unique, not_null]
+      - name: repo_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('repo_catalog')
+                field: repo_id

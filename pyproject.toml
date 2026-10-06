@@ -15,6 +15,9 @@ oss-pulse-extract = "oss_pulse_ingest.extract_cli:main"
 oss-pulse-load = "oss_pulse_ingest.load_cli:main"
 
 [dependency-groups]
+dbt = [
+    "dbt-snowflake>=1.12.1",
+]
 dev = [
     "pytest>=8",
     "ruff>=0.6",

@@ -1,0 +1,29 @@
+name: oss_pulse
+version: "1.0.0"
+config-version: 2
+profile: oss_pulse
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+seed-paths: ["seeds"]
+snapshot-paths: ["snapshots"]
+test-paths: ["tests"]
+analysis-paths: ["analyses"]
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  oss_pulse:
+    silver:
+      +schema: silver
+      staging:
+        +materialized: view
+    gold:
+      +schema: gold
+      +materialized: table
+
+seeds:
+  oss_pulse:
+    +schema: silver
+    repo_catalog:
+      +column_types:
+        repo_id: number

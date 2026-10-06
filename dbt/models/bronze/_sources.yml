@@ -1,0 +1,15 @@
+version: 2
+
+sources:
+  - name: github
+    description: Raw GitHub API data, loaded by the Airflow pipeline (one table, all resources).
+    database: OSS_PULSE_DEV
+    schema: BRONZE
+    config:
+      loaded_at_field: _loaded_at
+      freshness:
+        warn_after: {count: 26, period: hour}
+        error_after: {count: 50, period: hour}
+    tables:
+      - name: github_raw
+        description: One row per extracted record. `resource` says which kind; `record` is the raw JSON.
