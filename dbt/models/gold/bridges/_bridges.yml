@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: bridge_repo_topic
+    description: Bridge between repos and topics (many-to-many), using current topics.
+    columns:
+      - name: repo_topic_key
+        data_tests: [unique, not_null]
+      - name: topic_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('dim_topic'), field: topic_key}

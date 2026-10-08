@@ -1,0 +1,69 @@
+version: 2
+
+models:
+  - name: fct_contributions
+    description: Transaction fact. One row per contribution (PR opened, issue opened, comment). Incremental.
+    columns:
+      - name: contribution_id
+        data_tests: [unique, not_null]
+      - name: repo_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('dim_repo'), field: repo_key}
+      - name: contributor_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('dim_contributor'), field: contributor_key}
+      - name: date_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('dim_date'), field: date_key}
+
+  - name: fct_pull_requests
+    description: Accumulating snapshot fact. One row per pull request, updated as it moves through milestones.
+    columns:
+      - name: pull_request_id
+        data_tests: [unique, not_null]
+      - name: repo_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('dim_repo'), field: repo_key}
+      - name: author_contributor_key
+        description: Null when the author's GitHub account was deleted.
+        data_tests:
+          - relationships:
+              arguments: {to: ref('dim_contributor'), field: contributor_key}
+      - name: created_date_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('dim_date'), field: date_key}
+      - name: first_response_at
+        data_tests:
+          - not_before:
+              arguments: {other_column: created_at}
+      - name: merged_at
+        data_tests:
+          - not_before:
+              arguments: {other_column: created_at}
+      - name: closed_at
+        data_tests:
+          - not_before:
+              arguments: {other_column: created_at}
+      - name: hours_to_merge
+        description: Hours from opened to merged. Null if not merged.
+
+  - name: fct_repo_daily
+    description: Periodic snapshot fact. One row per repo per capture day (stars, forks, open items).
+    columns:
+      - name: repo_snapshot_key
+        data_tests: [unique, not_null]
+      - name: repo_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('dim_repo'), field: repo_key}

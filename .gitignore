@@ -19,3 +19,4 @@ dbt/logs/
 
 # os
 .DS_Store
+dbt/.user.yml

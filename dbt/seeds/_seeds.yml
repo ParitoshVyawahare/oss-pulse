@@ -1,0 +1,20 @@
+version: 2
+
+seeds:
+  - name: repo_catalog
+    description: The curated list of repos OSS Pulse tracks (also read by the ingestion code).
+    columns:
+      - name: repo_id
+        data_tests: [unique, not_null]
+      - name: repo_name
+        data_tests: [unique, not_null]
+
+  - name: known_bots
+    description: >
+      Accounts reviewed by a person and classified as automated, even though GitHub
+      reports them as normal users. Add a row (with a reason) to exclude one from metrics.
+    columns:
+      - name: login
+        data_tests: [unique, not_null]
+      - name: reason
+        data_tests: [not_null]
