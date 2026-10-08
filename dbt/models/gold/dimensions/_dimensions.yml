@@ -1,0 +1,56 @@
+version: 2
+
+models:
+  - name: dim_date
+    description: One row per calendar day, 2008-01-01 to 2027-12-31.
+    columns:
+      - name: date_key
+        description: YYYYMMDD integer. Primary key; facts join on this.
+        data_tests: [unique, not_null]
+      - name: calendar_date
+        data_tests: [unique, not_null]
+
+  - name: dim_repo
+    description: >
+      SCD Type 2. One row per version of a repo; a new version starts when name, owner,
+      language, license, archived status or default branch changes.
+    data_tests:
+      - no_overlapping_ranges:
+          arguments:
+            partition_by: repo_id
+            from_column: valid_from
+            to_column: valid_to
+    columns:
+      - name: repo_key
+        description: Surrogate key for one repo version. Facts store this.
+        data_tests: [unique, not_null]
+      - name: repo_id
+        description: GitHub's permanent repo id (same across versions).
+        data_tests: [not_null]
+      - name: valid_from
+        data_tests: [not_null]
+      - name: valid_to
+        data_tests: [not_null]
+
+  - name: dim_contributor
+    description: >
+      SCD Type 1. One row per contributor; logins are overwritten on rename.
+      is_bot combines GitHub's own bot rule with the reviewed known_bots seed.
+    columns:
+      - name: contributor_key
+        data_tests: [unique, not_null]
+      - name: contributor_id
+        description: GitHub's permanent user id.
+        data_tests: [unique, not_null]
+      - name: is_bot
+        data_tests: [not_null]
+      - name: first_seen_at
+        description: First contribution in OUR data (not necessarily their first ever).
+
+  - name: dim_topic
+    description: One row per GitHub topic tag used by a tracked repo.
+    columns:
+      - name: topic_key
+        data_tests: [unique, not_null]
+      - name: topic
+        data_tests: [unique, not_null]

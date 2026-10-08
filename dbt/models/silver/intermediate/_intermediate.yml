@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: int_github__contributions
+    description: One row per contribution (PR opened, issue opened, or comment).
+    columns:
+      - name: contribution_id
+        description: contribution_type + source id. Primary key.
+        data_tests: [unique, not_null]
+      - name: contribution_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['pr_opened', 'issue_opened', 'comment']
