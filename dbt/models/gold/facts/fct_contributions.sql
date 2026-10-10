@@ -15,7 +15,7 @@ with contributions as (
     select * from {{ ref('int_github__contributions') }}
     {% if is_incremental() %}
     -- Lookback window: re-check the last 3 days so late-arriving data is not missed.
-    where contributed_at >= (select dateadd('day', -3, max(contributed_at)) from {{ this }})
+    where contributed_at >= (select dateadd('day', -{{ var('lookback_days', 3) }}, max(contributed_at)) from {{ this }})
     {% endif %}
 )
 

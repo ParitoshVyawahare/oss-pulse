@@ -1,0 +1,165 @@
+version: 2
+
+# Semantic models describe the gold tables in business terms for MetricFlow:
+#   entities   = join keys (MetricFlow joins tables through them automatically)
+#   dimensions = what you can group or filter by
+#   measures   = what you can count or aggregate
+
+semantic_models:
+
+  - name: contributions
+    description: One row per contribution (PR opened, issue opened, or comment).
+    model: ref('fct_contributions')
+    defaults:
+      agg_time_dimension: contributed_at
+    entities:
+      - name: contribution
+        type: primary
+        expr: contribution_id
+      - name: contributor
+        type: foreign
+        expr: contributor_key
+      - name: repo
+        type: foreign
+        expr: repo_key
+    dimensions:
+      - name: contributed_at
+        type: time
+        type_params:
+          time_granularity: day
+      - name: contribution_type
+        type: categorical
+    measures:
+      - name: contribution_count
+        description: Number of contributions.
+        agg: count
+        expr: contribution_id
+      - name: active_contributor_count
+        description: Number of distinct contributors.
+        agg: count_distinct
+        expr: contributor_key
+
+  - name: contributors
+    description: One row per contributor (person or bot).
+    model: ref('dim_contributor')
+    defaults:
+      agg_time_dimension: first_seen_at
+    entities:
+      - name: contributor
+        type: primary
+        expr: contributor_key
+    dimensions:
+      - name: is_bot
+        type: categorical
+      - name: account_type
+        type: categorical
+      - name: first_seen_at
+        type: time
+        type_params:
+          time_granularity: day
+    measures:
+      - name: new_contributor_count
+        description: Contributors counted on the day they were first seen in our data.
+        agg: count
+        expr: contributor_key
+
+  - name: repos
+    description: One row per repo version (SCD Type 2). Facts already store the version key.
+    model: ref('dim_repo')
+    entities:
+      - name: repo
+        type: primary
+        expr: repo_key
+    dimensions:
+      - name: repo_name
+        type: categorical
+      - name: primary_language
+        type: categorical
+      - name: license_spdx_id
+        type: categorical
+      - name: owner_type
+        type: categorical
+      - name: is_archived
+        type: categorical
+
+  - name: pull_requests
+    description: One row per pull request across its whole life.
+    model: ref('fct_pull_requests')
+    defaults:
+      agg_time_dimension: created_at
+    entities:
+      - name: pull_request
+        type: primary
+        expr: pull_request_id
+      - name: repo
+        type: foreign
+        expr: repo_key
+      - name: contributor
+        type: foreign
+        expr: author_contributor_key
+    dimensions:
+      - name: created_at
+        type: time
+        type_params:
+          time_granularity: day
+      - name: merged_at
+        type: time
+        type_params:
+          time_granularity: day
+      - name: state
+        type: categorical
+      - name: is_merged
+        type: categorical
+    measures:
+      - name: pr_count
+        description: Pull requests opened (counted on the day they were opened).
+        agg: count
+        expr: pull_request_id
+      - name: merged_pr_count_by_open_date
+        description: Opened PRs that were later merged (counted on the day they were opened).
+        agg: sum
+        expr: "case when is_merged then 1 else 0 end"
+      - name: merged_pr_count
+        description: Pull requests merged (counted on the day they were merged).
+        agg: sum
+        expr: "case when is_merged then 1 else 0 end"
+        agg_time_dimension: merged_at
+      - name: hours_to_merge_median
+        description: Median hours from opened to merged (on the merge day).
+        agg: median
+        expr: hours_to_merge
+        agg_time_dimension: merged_at
+      - name: hours_to_first_response_median
+        description: Median hours from opened to the first non-author, non-bot comment.
+        agg: median
+        expr: hours_to_first_response
+
+  - name: repo_daily
+    description: One row per repo per capture day.
+    model: ref('fct_repo_daily')
+    defaults:
+      agg_time_dimension: snapshot_date
+    entities:
+      - name: repo_snapshot
+        type: primary
+        expr: repo_snapshot_key
+      - name: repo
+        type: foreign
+        expr: repo_key
+    dimensions:
+      - name: snapshot_date
+        type: time
+        type_params:
+          time_granularity: day
+    measures:
+      - name: stars_gained
+        description: Stars gained since the previous capture.
+        agg: sum
+        expr: stars_gained_since_previous
+      - name: total_stars
+        description: Star count on the latest day in the period (semi-additive).
+        agg: sum
+        expr: stars
+        non_additive_dimension:
+          name: snapshot_date
+          window_choice: max
