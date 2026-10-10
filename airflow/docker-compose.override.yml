@@ -1,8 +1,14 @@
-# Local development only: let Airflow see the rest of the OSS Pulse repo.
+# Local development only.
+# 1. Let Airflow see the rest of the OSS Pulse repo (code, dbt project, landing zone).
+# 2. Share the Snowflake private key READ-ONLY. It stays in ~/.snowflake on the Mac,
+#    outside the repo, and is never copied into the image or committed.
+#    The dag-processor needs it too: Cosmos reads the dbt project when parsing DAGs.
 services:
   scheduler:
     volumes:
       - ../:/usr/local/airflow/oss-pulse
+      - ${HOME}/.snowflake:/usr/local/airflow/secrets/snowflake:ro
   dag-processor:
     volumes:
       - ../:/usr/local/airflow/oss-pulse
+      - ${HOME}/.snowflake:/usr/local/airflow/secrets/snowflake:ro

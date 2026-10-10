@@ -178,7 +178,7 @@ def catalog_table(df) -> str:
 
 
 # --- Build -----------------------------------------------------------------------------
-def build() -> Path:
+def build(output: Path = OUTPUT) -> Path:
     today = dt.date.today()
     window = {"start_time": DATA_START.isoformat(), "end_time": today.isoformat()}
 
@@ -254,10 +254,10 @@ def build() -> Path:
         specs=json.dumps(specs),
     )
 
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text(page, encoding="utf-8")
-    (OUTPUT.parent / ".nojekyll").touch()  # serve files as-is on GitHub Pages
-    return OUTPUT
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(page, encoding="utf-8")
+    (output.parent / ".nojekyll").touch()  # serve files as-is on GitHub Pages
+    return output
 
 
 TEMPLATE = """<!doctype html>

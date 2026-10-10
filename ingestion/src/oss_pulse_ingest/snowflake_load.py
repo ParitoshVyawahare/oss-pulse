@@ -129,3 +129,23 @@ def load_partition(cur, p: Partition) -> int:
 def ensure_objects(cur) -> None:
     for sql in SETUP_SQL:
         cur.execute(sql)
+
+
+def partitions_for_window(landing_dir: Path, window) -> list[Partition]:
+    """Only the landing folders one extraction run produced (used by Airflow).
+
+    Loading just these keeps each daily load small, instead of reloading every folder.
+    """
+    wanted = {f"window={window.label}", f"snapshot_date={window.end:%Y-%m-%d}"}
+    return [p for p in find_partitions(landing_dir) if p.folder in wanted]
+
+
+def load_partitions(partitions: list[Partition]) -> dict[str, int]:
+    """Connect once, make sure the objects exist, and (re)load each folder."""
+    conn = connect()
+    try:
+        cur = conn.cursor()
+        ensure_objects(cur)
+        return {f"{p.resource}/{p.folder}": load_partition(cur, p) for p in partitions}
+    finally:
+        conn.close()
