@@ -12,8 +12,10 @@ from airflow.sdk import Asset, task
 
 from oss_pulse_dags.alerts import notify_slack_on_failure
 
-# Downstream DAGs (dbt, week 3+) will be scheduled on this Asset instead of a clock time.
-GITHUB_LANDING = Asset("oss_pulse_github_landing")
+# Assets announce "this data was updated". Downstream DAGs can be scheduled on them
+# instead of a clock time (data-aware scheduling).
+GITHUB_LANDING = Asset("oss_pulse_github_landing")  # files written to the landing zone
+GITHUB_BRONZE = Asset("oss_pulse_github_bronze")  # rows loaded into Snowflake BRONZE
 
 DEFAULT_ARGS = {
     "owner": "paritosh",
@@ -27,7 +29,7 @@ RESULT_KEYS = ("repos", "pulls", "issues", "comments", "releases", "requests")
 
 
 def github_extraction():
-    """Add list_repos -> extract_repo (mapped) -> summarize to the current DAG."""
+    """Add list_repos -> extract_repo (mapped) -> summarize -> load_to_snowflake."""
 
     @task
     def list_repos() -> list[dict]:
@@ -72,4 +74,24 @@ def github_extraction():
         print(f"Window {results[0]['window']}: {len(results)} repos extracted, totals={totals}")
         return totals
 
-    return summarize(extract_repo.expand(repo=list_repos()))
+    @task(outlets=[GITHUB_BRONZE])
+    def load_to_snowflake(summary: dict, **context) -> dict:
+        """Load ONLY the landing folders this run produced into Snowflake BRONZE."""
+        from oss_pulse_ingest.config import LANDING_DIR
+        from oss_pulse_ingest.extract import Window
+        from oss_pulse_ingest.snowflake_load import load_partitions, partitions_for_window
+
+        window = Window.from_interval(
+            context.get("data_interval_start"), context.get("data_interval_end")
+        )
+        partitions = partitions_for_window(LANDING_DIR, window)
+        if not partitions:
+            raise ValueError(f"No landing files found for window {window.label}")
+        loaded = load_partitions(partitions)
+        for folder, rows in loaded.items():
+            print(f"loaded {folder}: {rows} rows")
+        total = sum(loaded.values())
+        print(f"Window {window.label}: {total} rows loaded from {len(loaded)} folders")
+        return {"window": window.label, "rows_loaded": total, "folders": len(loaded)}
+
+    return load_to_snowflake(summarize(extract_repo.expand(repo=list_repos())))

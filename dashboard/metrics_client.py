@@ -7,6 +7,7 @@ dbt/models/gold/semantic/_metrics.yml, so the dashboard can never drift from the
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -18,7 +19,8 @@ if TYPE_CHECKING:  # pandas is imported lazily, so unit tests and CI don't need 
     import pandas as pd
 
 DBT_DIR = Path(__file__).resolve().parents[1] / "dbt"
-MF = Path(sys.executable).parent / "mf"  # the mf CLI installed in the same environment
+# The mf CLI: same environment by default; Airflow points MF_EXECUTABLE at its dbt venv.
+MF = Path(os.getenv("MF_EXECUTABLE", Path(sys.executable).parent / "mf"))
 
 
 class MetricQueryError(RuntimeError):
