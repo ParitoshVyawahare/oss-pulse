@@ -1,0 +1,158 @@
+version: 2
+
+# Governed metrics: each business definition lives here ONCE.
+# "Human" metrics exclude bots by definition, so no dashboard can forget the filter.
+
+metrics:
+
+  # --- Community activity ---------------------------------------------------
+  - name: active_contributors
+    label: Active contributors
+    description: Distinct human contributors with at least one contribution in the period.
+    type: simple
+    type_params:
+      measure:
+        name: active_contributor_count
+        fill_nulls_with: 0
+    filter: "{{ Dimension('contributor__is_bot') }} = false"
+
+  - name: contributions
+    label: Contributions
+    description: Human contributions (PRs opened, issues opened, comments).
+    type: simple
+    type_params:
+      measure:
+        name: contribution_count
+        fill_nulls_with: 0
+    filter: "{{ Dimension('contributor__is_bot') }} = false"
+
+  - name: all_contributions
+    label: All contributions (incl. bots)
+    description: Every contribution, humans and bots. Used as a denominator.
+    type: simple
+    type_params:
+      measure:
+        name: contribution_count
+        fill_nulls_with: 0
+
+  - name: bot_contributions
+    label: Bot contributions
+    description: Contributions made by bots (GitHub rule or the reviewed known_bots list).
+    type: simple
+    type_params:
+      measure:
+        name: contribution_count
+        fill_nulls_with: 0
+    filter: "{{ Dimension('contributor__is_bot') }} = true"
+
+  - name: bot_contribution_share
+    label: Bot share of contributions
+    description: Share of all contributions made by bots.
+    type: ratio
+    type_params:
+      numerator: bot_contributions
+      denominator: all_contributions
+
+  - name: new_contributors
+    label: New contributors
+    description: Human contributors seen for the first time in our data.
+    type: simple
+    type_params:
+      measure:
+        name: new_contributor_count
+        fill_nulls_with: 0
+    filter: "{{ Dimension('contributor__is_bot') }} = false"
+
+  - name: cumulative_contributors
+    label: Cumulative contributors
+    description: Running total of human contributors seen so far.
+    type: cumulative
+    type_params:
+      measure:
+        name: new_contributor_count
+        filter: "{{ Dimension('contributor__is_bot') }} = false"
+
+  - name: active_contributors_wow_change
+    label: Active contributors, week-over-week change
+    description: Relative change in active contributors versus the previous week.
+    type: derived
+    type_params:
+      expr: (current_week - previous_week) / nullif(previous_week, 0)
+      metrics:
+        - name: active_contributors
+          alias: current_week
+        - name: active_contributors
+          offset_window: 1 week
+          alias: previous_week
+
+  # --- Pull requests ----------------------------------------------------------
+  - name: prs_opened
+    label: PRs opened
+    description: Pull requests opened by humans.
+    type: simple
+    type_params:
+      measure:
+        name: pr_count
+        fill_nulls_with: 0
+    filter: "{{ Dimension('contributor__is_bot') }} = false"
+
+  - name: prs_merged
+    label: PRs merged
+    description: Human pull requests merged, counted on the merge date.
+    type: simple
+    type_params:
+      measure:
+        name: merged_pr_count
+        fill_nulls_with: 0
+    filter: "{{ Dimension('contributor__is_bot') }} = false"
+
+  - name: prs_opened_later_merged
+    label: PRs opened and later merged
+    description: Human PRs opened in the period that were eventually merged.
+    type: simple
+    type_params:
+      measure:
+        name: merged_pr_count_by_open_date
+        fill_nulls_with: 0
+    filter: "{{ Dimension('contributor__is_bot') }} = false"
+
+  - name: pr_merge_rate
+    label: PR merge rate
+    description: Share of human PRs opened in the period that were eventually merged.
+    type: ratio
+    type_params:
+      numerator: prs_opened_later_merged
+      denominator: prs_opened
+
+  - name: median_hours_to_merge
+    label: Median hours to merge
+    description: Median hours from opened to merged for human PRs, on the merge date.
+    type: simple
+    type_params:
+      measure: hours_to_merge_median
+    filter: "{{ Dimension('contributor__is_bot') }} = false"
+
+  - name: median_hours_to_first_response
+    label: Median hours to first response
+    description: Median hours until someone other than the author (and not a bot) replied.
+    type: simple
+    type_params:
+      measure: hours_to_first_response_median
+    filter: "{{ Dimension('contributor__is_bot') }} = false"
+
+  # --- Repo growth ------------------------------------------------------------
+  - name: stars_gained
+    label: Stars gained
+    description: Stars gained across repos in the period.
+    type: simple
+    type_params:
+      measure:
+        name: stars_gained
+        fill_nulls_with: 0
+
+  - name: total_stars
+    label: Total stars
+    description: Star count at the end of the period (latest capture day).
+    type: simple
+    type_params:
+      measure: total_stars

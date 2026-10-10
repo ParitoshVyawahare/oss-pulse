@@ -1,2 +1,5 @@
 login,reason,reviewed_on
 fa-assistant,Automated schema-sync PRs from dbt-fusion; GitHub reports it as a User,2026-10-06
+hello-stephen,Automated replies: 2277 comments within 5 minutes of PRs being opened in apache/doris,2026-10-10
+CLAassistant,Contributor License Agreement bot; posts on every new contributor's PR,2026-10-10
+CelerData-Reviewer,Automated review account: 449 comments within 5 minutes of PRs being opened in StarRocks,2026-10-10
