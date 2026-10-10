@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GitHub Community Health Analytics</title>
+<meta name="description" content="How active are the communities behind 64 popular open-source data tools, and how much of the work is done by bots?">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
+      rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+<style>
+  :root { --ink:#0F172A; --muted:#64748B; --line:#E2E8F0; --bg:#F8FAFC; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font-family: Inter, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 36px 24px 48px; }
+  .brand { display:flex; align-items:center; gap:16px; }
+  .brand h1 { font-size: clamp(1.6rem, 3.2vw, 2.4rem); font-weight:800; margin:0;
+              letter-spacing:-0.02em; line-height:1.1; }
+  .subtitle { color:#475569; font-size:1.05rem; margin:10px 0 14px; }
+  .badges span { display:inline-block; background:#EEF2F7; color:#334155; border-radius:999px;
+                 padding:4px 12px; font-size:.8rem; font-weight:600; margin:0 6px 6px 0; }
+  .hero { background:linear-gradient(135deg,#EFF6FF 0%,#FFF7ED 100%); border:1px solid var(--line);
+          border-radius:18px; padding:24px 28px; margin:18px 0 22px; }
+  .hero .big { font-size: clamp(1.25rem, 2.6vw, 1.75rem); font-weight:800; line-height:1.25; }
+  .hero .big .bot { color:#D97706; }
+  .hero .small { color:#475569; margin-top:6px; }
+  .kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+  .kpi { background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px 20px;
+         box-shadow:0 1px 2px rgba(15,23,42,.05); }
+  .kpi .label { color:var(--muted); font-size:.75rem; font-weight:700; text-transform:uppercase;
+                letter-spacing:.05em; }
+  .kpi .value { font-size:2rem; font-weight:800; margin-top:4px; }
+  .kpi .note { color:var(--muted); font-size:.8rem; }
+  .row { display:grid; grid-template-columns:3fr 2fr; gap:28px; margin-top:28px; }
+  .row.even { grid-template-columns:1fr 1fr; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px 20px; }
+  h2 { font-size:1.15rem; margin:0; }
+  .note { color:var(--muted); font-size:.88rem; margin:2px 0 8px; }
+  .chart { width:100%; }
+  h3.section { font-size:1.35rem; margin:40px 0 4px; }
+  table { width:100%; border-collapse:collapse; font-size:.92rem; background:#fff; }
+  th, td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line);
+            vertical-align:top; }
+  th { color:var(--muted); font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; }
+  td.num, th.num { text-align:right; }
+  .table-wrap { overflow-x:auto; border:1px solid var(--line); border-radius:14px; }
+  .code { font-family: ui-monospace, Menlo, monospace; color:var(--muted); font-size:.8rem; }
+  footer { color:var(--muted); font-size:.85rem; text-align:center; margin-top:40px; }
+  footer a { color:#2563EB; text-decoration:none; }
+  @media (max-width: 900px) {
+    .kpis { grid-template-columns:repeat(2,1fr); }
+    .row, .row.even { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 52 52"><rect width="52" height="52" rx="14" fill="#2563EB"/><polyline points="11,34 20,24 28,30 40,16" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="40" cy="16" r="4.5" fill="#F59E0B" stroke="#FFFFFF" stroke-width="2"/></svg><h1>GitHub Community Health Analytics</h1></div>
+  <div class="subtitle">How active are the communities behind 64 popular open-source data tools, and how much of the work is done by bots?</div>
+  <div class="badges">
+    <span>64 repositories</span><span>Aug 01 – Oct 10, 2026</span>
+    <span>Governed metrics · dbt + MetricFlow</span><span>Airflow · Snowflake</span>
+    <span>Last updated Oct 10, 2026</span>
+  </div>
+
+  <div class="hero">
+    <div class="big"><span class="bot">48%</span> of all activity in these
+      communities comes from bots.</div>
+    <div class="small">172,372 bot contributions vs 186,758 human contributions.
+      Every human metric on this page excludes bots by definition.</div>
+  </div>
+
+  <div class="kpis"><div class="kpi"><div class="label">Active contributors</div><div class="value">10,378</div><div class="note">distinct humans</div></div><div class="kpi"><div class="label">Human contributions</div><div class="value">186,758</div><div class="note">PRs, issues, comments</div></div><div class="kpi"><div class="label">PRs merged</div><div class="value">38,666</div><div class="note">authored by humans</div></div><div class="kpi"><div class="label">Bot share</div><div class="value">48.0%</div><div class="note">of all contributions</div></div></div>
+
+  <div class="row">
+    <div class="card"><h2>Weekly contributions: humans vs bots</h2>
+      <div class="note">Stacked: the amber band is automation. Complete weeks only.</div>
+      <div id="stacked" class="chart"></div></div>
+    <div class="card"><h2>Active contributors per week</h2>
+      <div class="note">Distinct humans with at least one contribution.</div>
+      <div id="contributors" class="chart"></div></div>
+  </div>
+
+  <h3 class="section">Projects</h3>
+  <div class="row even">
+    <div class="card"><h2>Most active projects</h2>
+      <div class="note">Human pull requests merged.</div>
+      <div id="merged" class="chart"></div></div>
+    <div class="card"><h2>How fast do they reply?</h2>
+      <div class="note">Median hours to the first human reply on a PR.</div>
+      <div id="reply" class="chart"></div></div>
+  </div>
+  <div class="table-wrap" style="margin-top:20px"><table><thead><tr><th>Repository</th><th class="num">PRs merged</th><th class="num">Merge rate</th><th class="num">Median hours to merge</th><th class="num">Median hours to first reply</th></tr></thead><tbody><tr><td>ClickHouse/ClickHouse</td><td class="num">7,192</td><td class="num">72%</td><td class="num">31.9</td><td class="num">42.8</td></tr><tr><td>metabase/metabase</td><td class="num">3,286</td><td class="num">74%</td><td class="num">19.9</td><td class="num">24.6</td></tr><tr><td>lightdash/lightdash</td><td class="num">2,670</td><td class="num">82%</td><td class="num">1.7</td><td class="num">2.0</td></tr><tr><td>grafana/grafana</td><td class="num">2,501</td><td class="num">70%</td><td class="num">19.0</td><td class="num">29.9</td></tr><tr><td>open-metadata/OpenMetadata</td><td class="num">2,342</td><td class="num">81%</td><td class="num">15.9</td><td class="num">36.9</td></tr><tr><td>apache/airflow</td><td class="num">1,813</td><td class="num">60%</td><td class="num">59.4</td><td class="num">99.3</td></tr><tr><td>apache/doris</td><td class="num">1,347</td><td class="num">63%</td><td class="num">50.0</td><td class="num">38.8</td></tr><tr><td>apache/superset</td><td class="num">1,293</td><td class="num">74%</td><td class="num">94.1</td><td class="num">79.3</td></tr><tr><td>duckdb/duckdb</td><td class="num">1,293</td><td class="num">68%</td><td class="num">31.9</td><td class="num">17.2</td></tr><tr><td>kestra-io/kestra</td><td class="num">1,255</td><td class="num">73%</td><td class="num">19.4</td><td class="num">37.4</td></tr><tr><td>StarRocks/starrocks</td><td class="num">1,212</td><td class="num">70%</td><td class="num">17.4</td><td class="num">53.5</td></tr><tr><td>datahub-project/datahub</td><td class="num">922</td><td class="num">62%</td><td class="num">24.3</td><td class="num">87.1</td></tr></tbody></table></div>
+  <div class="note" style="margin-top:8px">Merge rate uses the PR's open date, so recent PRs may
+    not be merged yet. Some Apache projects merge outside GitHub's merge button.</div>
+
+  <h3 class="section">Metric definitions</h3>
+  <div class="note">Every number above is defined once, in dbt's semantic layer.</div>
+  <div class="table-wrap"><table><thead><tr><th>Metric</th><th>Type</th><th>Definition</th><th>Filter</th></tr></thead><tbody><tr><td><strong>Active contributors</strong><br><span class="code">active_contributors</span></td><td>simple</td><td>Distinct human contributors with at least one contribution in the period.</td><td>Excludes bots</td></tr><tr><td><strong>Active contributors, week-over-week change</strong><br><span class="code">active_contributors_wow_change</span></td><td>derived</td><td>Relative change in active contributors versus the previous week.</td><td>–</td></tr><tr><td><strong>All contributions (incl. bots)</strong><br><span class="code">all_contributions</span></td><td>simple</td><td>Every contribution, humans and bots. Used as a denominator.</td><td>–</td></tr><tr><td><strong>Bot share of contributions</strong><br><span class="code">bot_contribution_share</span></td><td>ratio</td><td>Share of all contributions made by bots.</td><td>–</td></tr><tr><td><strong>Bot contributions</strong><br><span class="code">bot_contributions</span></td><td>simple</td><td>Contributions made by bots (GitHub rule or the reviewed known_bots list).</td><td>Bots only</td></tr><tr><td><strong>Contributions</strong><br><span class="code">contributions</span></td><td>simple</td><td>Human contributions (PRs opened, issues opened, comments).</td><td>Excludes bots</td></tr><tr><td><strong>Cumulative contributors</strong><br><span class="code">cumulative_contributors</span></td><td>cumulative</td><td>Running total of human contributors seen so far.</td><td>–</td></tr><tr><td><strong>Median hours to first response</strong><br><span class="code">median_hours_to_first_response</span></td><td>simple</td><td>Median hours until someone other than the author (and not a bot) replied.</td><td>Excludes bots</td></tr><tr><td><strong>Median hours to merge</strong><br><span class="code">median_hours_to_merge</span></td><td>simple</td><td>Median hours from opened to merged for human PRs, on the merge date.</td><td>Excludes bots</td></tr><tr><td><strong>New contributors</strong><br><span class="code">new_contributors</span></td><td>simple</td><td>Human contributors seen for the first time in our data.</td><td>Excludes bots</td></tr><tr><td><strong>PR merge rate</strong><br><span class="code">pr_merge_rate</span></td><td>ratio</td><td>Share of human PRs opened in the period that were eventually merged.</td><td>–</td></tr><tr><td><strong>PRs merged</strong><br><span class="code">prs_merged</span></td><td>simple</td><td>Human pull requests merged, counted on the merge date.</td><td>Excludes bots</td></tr><tr><td><strong>PRs opened</strong><br><span class="code">prs_opened</span></td><td>simple</td><td>Pull requests opened by humans.</td><td>Excludes bots</td></tr><tr><td><strong>PRs opened and later merged</strong><br><span class="code">prs_opened_later_merged</span></td><td>simple</td><td>Human PRs opened in the period that were eventually merged.</td><td>Excludes bots</td></tr><tr><td><strong>Stars gained</strong><br><span class="code">stars_gained</span></td><td>simple</td><td>Stars gained across repos in the period.</td><td>–</td></tr><tr><td><strong>Total stars</strong><br><span class="code">total_stars</span></td><td>simple</td><td>Star count at the end of the period (latest capture day).</td><td>–</td></tr></tbody></table></div>
+
+  <footer>Built with Airflow · Snowflake · dbt · MetricFlow &nbsp;|&nbsp;
+    <a href="https://github.com/ParitoshVyawahare/oss-pulse">Source code on GitHub</a></footer>
+</div>
+<script>
+  const specs = {"stacked": {"config": {"view": {"continuousWidth": 300, "continuousHeight": 300, "strokeWidth": 0}, "axis": {"domain": false, "gridColor": "#EEF2F7", "labelColor": "#64748B", "labelFontSize": 12, "tickColor": "#EEF2F7", "titleColor": "#64748B", "titleFontSize": 12}, "legend": {"labelColor": "#0F172A", "labelFontSize": 12, "orient": "top", "title": null}}, "data": {"name": "data-4c95d41b6bc256e497cf5b92e1c6cfd1"}, "mark": {"type": "area", "interpolate": "monotone", "opacity": 0.9}, "encoding": {"color": {"field": "who", "scale": {"domain": ["Humans", "Bots"], "range": ["#2563EB", "#F59E0B"]}, "type": "nominal"}, "order": {"field": "who", "sort": "descending", "type": "nominal"}, "tooltip": [{"field": "week_label", "title": "Week of", "type": "nominal"}, {"field": "who", "type": "nominal"}, {"field": "count", "format": ",", "type": "quantitative"}], "x": {"axis": {"labelAngle": 0}, "field": "week_label", "sort": null, "title": null, "type": "nominal"}, "y": {"field": "count", "stack": "zero", "title": "Contributions", "type": "quantitative"}}, "height": 320, "width": "container", "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json", "datasets": {"data-4c95d41b6bc256e497cf5b92e1c6cfd1": [{"week_label": "Aug 03", "who": "Humans", "count": 18726}, {"week_label": "Aug 10", "who": "Humans", "count": 18002}, {"week_label": "Aug 17", "who": "Humans", "count": 17357}, {"week_label": "Aug 24", "who": "Humans", "count": 18246}, {"week_label": "Aug 31", "who": "Humans", "count": 17170}, {"week_label": "Sep 07", "who": "Humans", "count": 19200}, {"week_label": "Sep 14", "who": "Humans", "count": 19615}, {"week_label": "Sep 21", "who": "Humans", "count": 19583}, {"week_label": "Sep 28", "who": "Humans", "count": 19657}, {"week_label": "Aug 03", "who": "Bots", "count": 15809}, {"week_label": "Aug 10", "who": "Bots", "count": 16154}, {"week_label": "Aug 17", "who": "Bots", "count": 17744}, {"week_label": "Aug 24", "who": "Bots", "count": 15464}, {"week_label": "Aug 31", "who": "Bots", "count": 15123}, {"week_label": "Sep 07", "who": "Bots", "count": 17608}, {"week_label": "Sep 14", "who": "Bots", "count": 20399}, {"week_label": "Sep 21", "who": "Bots", "count": 17928}, {"week_label": "Sep 28", "who": "Bots", "count": 17429}]}}, "contributors": {"config": {"view": {"continuousWidth": 300, "continuousHeight": 300, "strokeWidth": 0}, "axis": {"domain": false, "gridColor": "#EEF2F7", "labelColor": "#64748B", "labelFontSize": 12, "tickColor": "#EEF2F7", "titleColor": "#64748B", "titleFontSize": 12}, "legend": {"labelColor": "#0F172A", "labelFontSize": 12, "orient": "top", "title": null}}, "data": {"name": "data-0e4e08f78d3b1a55cb352d33abe50a67"}, "mark": {"type": "line", "color": "#2563EB", "point": {"size": 60}, "strokeWidth": 3}, "encoding": {"tooltip": [{"field": "week_label", "title": "Week of", "type": "nominal"}, {"field": "active_contributors", "format": ",", "type": "quantitative"}], "x": {"axis": {"labelAngle": 0}, "field": "week_label", "sort": null, "title": null, "type": "nominal"}, "y": {"field": "active_contributors", "scale": {"zero": true}, "title": "Contributors", "type": "quantitative"}}, "height": 320, "width": "container", "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json", "datasets": {"data-0e4e08f78d3b1a55cb352d33abe50a67": [{"week_label": "Aug 03", "active_contributors": 2487}, {"week_label": "Aug 10", "active_contributors": 2468}, {"week_label": "Aug 17", "active_contributors": 2328}, {"week_label": "Aug 24", "active_contributors": 2428}, {"week_label": "Aug 31", "active_contributors": 2419}, {"week_label": "Sep 07", "active_contributors": 2467}, {"week_label": "Sep 14", "active_contributors": 2471}, {"week_label": "Sep 21", "active_contributors": 2555}, {"week_label": "Sep 28", "active_contributors": 2774}]}}, "merged": {"config": {"view": {"continuousWidth": 300, "continuousHeight": 300, "strokeWidth": 0}, "axis": {"domain": false, "gridColor": "#EEF2F7", "labelColor": "#64748B", "labelFontSize": 12, "tickColor": "#EEF2F7", "titleColor": "#64748B", "titleFontSize": 12}, "legend": {"labelColor": "#0F172A", "labelFontSize": 12, "orient": "top", "title": null}}, "data": {"name": "data-e9d656463bc9818c0ceb5e4febc29482"}, "mark": {"type": "bar", "color": "#2563EB", "cornerRadiusEnd": 4}, "encoding": {"tooltip": [{"field": "repository", "type": "nominal"}, {"field": "prs_merged", "format": ",.1f", "type": "quantitative"}], "x": {"field": "prs_merged", "title": "PRs merged", "type": "quantitative"}, "y": {"field": "repository", "sort": "-x", "title": null, "type": "nominal"}}, "height": 400, "width": "container", "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json", "datasets": {"data-e9d656463bc9818c0ceb5e4febc29482": [{"repository": "ClickHouse/ClickHouse", "prs_merged": 7192}, {"repository": "metabase/metabase", "prs_merged": 3286}, {"repository": "lightdash/lightdash", "prs_merged": 2670}, {"repository": "grafana/grafana", "prs_merged": 2501}, {"repository": "open-metadata/OpenMetadata", "prs_merged": 2342}, {"repository": "apache/airflow", "prs_merged": 1813}, {"repository": "apache/doris", "prs_merged": 1347}, {"repository": "apache/superset", "prs_merged": 1293}, {"repository": "duckdb/duckdb", "prs_merged": 1293}, {"repository": "kestra-io/kestra", "prs_merged": 1255}, {"repository": "StarRocks/starrocks", "prs_merged": 1212}, {"repository": "datahub-project/datahub", "prs_merged": 922}]}}, "reply": {"config": {"view": {"continuousWidth": 300, "continuousHeight": 300, "strokeWidth": 0}, "axis": {"domain": false, "gridColor": "#EEF2F7", "labelColor": "#64748B", "labelFontSize": 12, "tickColor": "#EEF2F7", "titleColor": "#64748B", "titleFontSize": 12}, "legend": {"labelColor": "#0F172A", "labelFontSize": 12, "orient": "top", "title": null}}, "data": {"name": "data-52cb4b9fc2cf0d829025640ceaca378c"}, "mark": {"type": "bar", "color": "#0EA5E9", "cornerRadiusEnd": 4}, "encoding": {"tooltip": [{"field": "repository", "type": "nominal"}, {"field": "median_hours_to_first_response", "format": ",.1f", "type": "quantitative"}], "x": {"field": "median_hours_to_first_response", "title": "Hours (lower is faster)", "type": "quantitative"}, "y": {"field": "repository", "sort": "x", "title": null, "type": "nominal"}}, "height": 400, "width": "container", "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json", "datasets": {"data-52cb4b9fc2cf0d829025640ceaca378c": [{"repository": "ClickHouse/ClickHouse", "median_hours_to_first_response": 42.771389}, {"repository": "metabase/metabase", "median_hours_to_first_response": 24.588611}, {"repository": "lightdash/lightdash", "median_hours_to_first_response": 1.955833}, {"repository": "grafana/grafana", "median_hours_to_first_response": 29.8856945}, {"repository": "open-metadata/OpenMetadata", "median_hours_to_first_response": 36.935139}, {"repository": "apache/airflow", "median_hours_to_first_response": 99.3361115}, {"repository": "apache/doris", "median_hours_to_first_response": 38.755}, {"repository": "apache/superset", "median_hours_to_first_response": 79.289722}, {"repository": "duckdb/duckdb", "median_hours_to_first_response": 17.2080555}, {"repository": "kestra-io/kestra", "median_hours_to_first_response": 37.3970835}, {"repository": "StarRocks/starrocks", "median_hours_to_first_response": 53.542778}, {"repository": "datahub-project/datahub", "median_hours_to_first_response": 87.129028}]}}};
+  for (const [id, spec] of Object.entries(specs)) {
+    vegaEmbed("#" + id, spec, { actions: false, renderer: "svg" });
+  }
+</script>
+</body>
+</html>
