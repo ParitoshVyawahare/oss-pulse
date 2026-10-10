@@ -15,6 +15,10 @@ oss-pulse-extract = "oss_pulse_ingest.extract_cli:main"
 oss-pulse-load = "oss_pulse_ingest.load_cli:main"
 
 [dependency-groups]
+dashboard = [
+    "pandas>=3.0.6",
+    "streamlit>=1.65.0",
+]
 dbt = [
     "dbt-metricflow>=0.15.0",
     "dbt-snowflake>=1.12.1",
