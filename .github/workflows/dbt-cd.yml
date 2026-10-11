@@ -1,0 +1,68 @@
+name: dbt-cd
+
+# After a merge to main: deploy the dbt project to the environment the pipeline uses,
+# then publish the dbt docs (lineage, models, columns, tests) to GitHub Pages at /dbt/.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "dbt/**"
+      - ".github/workflows/dbt-cd.yml"
+  workflow_dispatch:  # also allow a manual run from the Actions tab
+
+concurrency:  # never run two deploys at once; queue instead of cancelling
+  group: dbt-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: write  # needed to commit the generated docs
+
+jobs:
+  deploy:
+    name: deploy dbt + publish docs
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+      SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+      SNOWFLAKE_PRIVATE_KEY_PATH: /tmp/snowflake_key.p8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Install dbt (exactly as locked)
+        run: uv sync --locked --group dbt
+
+      - name: Write the Snowflake key to a temporary file
+        env:
+          SNOWFLAKE_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_PRIVATE_KEY }}
+        run: |
+          printf '%s\n' "$SNOWFLAKE_PRIVATE_KEY" > "$SNOWFLAKE_PRIVATE_KEY_PATH"
+          chmod 600 "$SNOWFLAKE_PRIVATE_KEY_PATH"
+
+      - name: Install dbt packages
+        working-directory: dbt
+        run: uv run dbt deps
+
+      - name: Deploy (build and test every model)
+        working-directory: dbt
+        run: uv run dbt build --target dev
+
+      - name: Generate the dbt docs as a single static page
+        working-directory: dbt
+        run: uv run dbt docs generate --static --target dev
+
+      - name: Publish the docs to GitHub Pages (docs/dbt/)
+        run: |
+          mkdir -p docs/dbt
+          cp dbt/target/static_index.html docs/dbt/index.html
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/dbt/index.html
+          if git diff --cached --quiet; then
+            echo "dbt docs unchanged; nothing to publish"
+            exit 0
+          fi
+          git commit -m "docs: publish dbt docs [skip ci]"
+          git pull --rebase origin main   # Airflow may have pushed a dashboard refresh
+          git push origin HEAD:main
