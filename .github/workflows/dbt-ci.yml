@@ -1,0 +1,56 @@
+name: dbt-ci
+
+# Build and test the whole dbt project on every pull request that changes it,
+# in isolated PR schemas that are dropped afterwards.
+on:
+  pull_request:
+    paths:
+      - "dbt/**"
+      - ".github/workflows/dbt-ci.yml"
+
+concurrency:  # a new push to the same PR cancels the previous run
+  group: dbt-ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  dbt-build:
+    name: dbt build (isolated PR schemas)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+      SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+      SNOWFLAKE_PRIVATE_KEY_PATH: /tmp/snowflake_key.p8
+      DBT_CI_SCHEMA: pr_${{ github.event.pull_request.number }}
+    defaults:
+      run:
+        working-directory: dbt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Install dbt (exactly as locked)
+        run: uv sync --locked --group dbt
+
+      - name: Write the Snowflake key to a temporary file
+        env:
+          SNOWFLAKE_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_PRIVATE_KEY }}
+        run: |
+          printf '%s\n' "$SNOWFLAKE_PRIVATE_KEY" > "$SNOWFLAKE_PRIVATE_KEY_PATH"
+          chmod 600 "$SNOWFLAKE_PRIVATE_KEY_PATH"
+
+      - name: Install dbt packages
+        run: uv run dbt deps
+
+      - name: Remove leftovers from earlier runs of this PR
+        run: uv run dbt run-operation drop_ci_schemas --target ci
+
+      - name: Build and test every model
+        run: uv run dbt build --target ci
+
+      - name: Drop this PR's schemas
+        if: always()  # clean up even when the build fails
+        run: uv run dbt run-operation drop_ci_schemas --target ci
