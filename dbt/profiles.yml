@@ -1,4 +1,4 @@
-# Connection settings. No secrets here: values come from environment variables (.env).
+# Connection settings. No secrets here: values come from environment variables.
 oss_pulse:
   target: dev
   outputs:
@@ -12,3 +12,16 @@ oss_pulse:
       database: OSS_PULSE_DEV
       schema: dev
       threads: 4
+    # Used by GitHub Actions on pull requests. Every model is built into schemas
+    # prefixed with the PR number (e.g. PR_8_SILVER, PR_8_GOLD), so CI never touches
+    # the tables the pipeline and dashboard use. See macros/generate_schema_name.sql.
+    ci:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('SNOWFLAKE_USER') }}"
+      private_key_path: "{{ env_var('SNOWFLAKE_PRIVATE_KEY_PATH') }}"
+      role: TRANSFORMER
+      warehouse: TRANSFORM_WH
+      database: OSS_PULSE_DEV
+      schema: "{{ env_var('DBT_CI_SCHEMA', 'ci_local') }}"
+      threads: 8
